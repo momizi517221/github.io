@@ -1,0 +1,1347 @@
+<canvas id="myCanvas"></canvas>
+
+<style>
+
+body {
+  margin: 0px;
+  overflow: hidden;
+}
+
+</style>
+
+<script>
+"use strict"
+
+const can = document.getElementById('myCanvas');
+const ctx = can.getContext('2d');
+  
+let ts = 32;
+let phase = 4
+  
+let back    = new Image(); back.src    = 'back.jpg';
+let btnImg  = new Image(); btnImg.src  = "ボタン.png"
+
+//let effect = new Image(); effect.src = "あたりエフェクト.jpeg"
+
+let standA  = new Image(); standA.src  = "立ちA.png";
+let standB  = new Image(); standB.src  = "立ちB.png";
+let standC  = new Image(); standC.src  = "立ちC.png";
+
+let jumpA   = new Image(); jumpA.src   = "ジャンプA.png";
+let jumpB   = new Image(); jumpB.src   = "ジャンプB.png";
+let jumpC   = new Image(); jumpC.src   = "ジャンプC.png";
+
+let wobbleA = new Image(); wobbleA.src = "よろけるA.png";
+let wobbleB = new Image(); wobbleB.src = "よろけるB.png";
+let wobbleC = new Image(); wobbleC.src = "よろけるC.png";
+
+let lieA    = new Image(); lieA.src    = "転倒A.png";
+let lieB    = new Image(); lieB.src    = "転倒B.png";
+let lieC    = new Image(); lieC.src    = "転倒C.png";
+
+let guardA  = new Image(); guardA.src  = "守りA.png";
+let guardB  = new Image(); guardB.src  = "守りB.png";
+let guardC  = new Image(); guardC.src  = "守りC.png";
+
+const Stand  = [standA, standB, standC];
+const Jump   = [jumpA, jumpB, jumpC];
+const Lie    = [lieA, lieB, lieC];
+const Wobble = [wobbleA, wobbleB, wobbleC];
+const Guard  = [guardA, guardB, guardC];
+  
+let moveRight1   = false;
+let moveLeft1    = false;
+let moveUp1      = false;
+let moveDown1    = false;
+let moveJump1    = false;
+let moveProtect1 = false;
+let moveRight2   = false;
+let moveLeft2    = false;
+let moveUp2      = false;
+let moveDown2    = false;
+let moveJump2    = false;
+let moveProtect2 = false;
+let weaKey1      = false;
+let strKey1      = false;
+let ultKey1      = false;  
+let weaKey2      = false;
+let strKey2      = false;
+let ultKey2      = false;
+  
+let startX1    = 300;
+let startX2    = 900;
+let ground     = 0;    //767地面
+
+let jumpHeight = 60; //ジャンプの高さ
+let upSpeed    = 120;      //上昇速度
+let downSpeed  =  40;    //下降速度
+
+
+let weakAttackSpeed1 = 1000;  //弱攻撃速度
+let weakAttackSpeed2 = 1000;  //弱攻撃速度
+let actionSpeed1 = 500;         //行動再開速度
+let actionSpeed2 = 500;
+let counterSpeed1 = 1000;        //カウンターされて動けなくなる速度
+let counterSpeed2 = 1000;
+  
+let angle1       = 0;
+let angle2       = 0;
+let jumpOn1      = false; //重力を復活させる
+let jumpOn2      = false; 
+let touchGround1 = true;
+let touchGround2 = true;
+let moveStop1    = false;
+let moveStop2    = false;
+
+
+can.width = window.innerWidth
+
+let size = can.width / 5;
+
+
+
+class ChA {
+  constructor(x, y, width, height, color, speed, HP, power) {
+    this.x      = 0;
+    this.y      = y;
+    this.width  = size;
+    this.height = size;
+	this.speed  = 40;
+    this.maxHP  = 100
+    this.HP     = this.maxHP;
+    this.ultPoint = 20;
+    this.power  = 10;
+    this.color  = "rgba(0,0,255,0.3)";
+	this.image  = standA;
+    this.ultMaxP = 100
+    this.ultP   = this.ultMaxP;
+  }
+  update() {
+    this.y = ground - this.height;
+  }
+}
+
+class ChB {
+  constructor(x, y, width, height, color, speed, HP, power) {
+    this.x      = 0;
+    this.y      = y;
+    this.width  = size;
+    this.height = size;
+    this.speed  = 32;
+    this.maxHP  = 100
+    this.HP     = this.maxHP;
+    this.ultPoint = 25;
+    this.power  = 10;
+	this.color  = "rgba(0,255,255,0.3)";
+	this.image  = standB;
+    this.ultMaxP = 100
+    this.ultP   = this.ultMaxP;
+  }
+  update() {
+    this.y = ground - this.height;
+  }
+}
+  
+class ChC {
+  constructor(x, y, width, height, color, speed, HP, power) {
+    this.x      = 0;
+    this.y      = y;
+    this.width  = size;
+    this.height = size;
+    this.speed  = 32;
+    this.maxHP  = 100
+    this.HP     = this.maxHP;
+    this.ultPoint = 20;
+    this.power  = 10;
+	this.color  = "rgba(255,0,0,0.3)";
+	this.image  = standC;
+    this.ultMaxP = 100
+    this.ultP   = this.ultMaxP;
+  }
+  update() {
+    this.y = ground - this.height;
+  }
+}
+  
+let chA1 = new ChA();
+let chA2 = new ChA(); 
+let chB1 = new ChB();
+let chB2 = new ChB(); 
+let chC1 = new ChC();
+let chC2 = new ChC();
+  
+const ch1 = [chA1, chB1, chC1];
+const ch2 = [chA2, chB2, chC2];
+ 
+let chara1 = 0;
+let chara2 = 2;
+  
+let player1 = ch1[chara1];
+let player2 = ch2[chara2];
+  
+player1.x = startX1;
+player2.x = startX2;
+
+
+class Skill {
+  constructor(p,ch,kind,x, y, width, height, color) {
+    this.p      = p;
+	  this.ch     = ch;
+    this.kind   = kind;
+    this.x      = 0;
+    this.y      = 0;
+    this.width  = 0;
+    this.height = 0;
+    this.color  = "yellow";
+  }
+
+  drawing(Angle, Player, MoveUp, MoveDown) {
+  if (Angle == 1) {
+    this.x = Player.x - this.width;
+    this.y = Player.y + Player.height / 2 - this.height / 2;
+  } else {
+    this.x = Player.x + Player.width;
+    this.y = Player.y + Player.height / 2 - this.height / 2;
+  }
+
+  if (MoveUp == true) {
+    this.x = Player.x + Player.width / 2 - this.width / 2;
+    this.y = Player.y - this.height;
+  }
+  if (MoveDown == true) {
+    this.x = Player.x + Player.width / 2 - this.width / 2;
+    this.y = Player.y + Player.height + this.height;
+  }
+
+}
+
+changeA(w1,h1,w2,h2,w3,h3,Player){
+
+    if(this.ch == 0) {
+    if(this.kind == "wea") {
+      this.width  = w1;
+      this.height = h1;
+    }
+    if(this.kind == "str") {
+      this.width  = w2;
+      this.height = h2; 
+    }
+    if(this.kind == "ult") {
+      this.x = Player.x -20
+      this.y = Player.y -100
+      this.width  = w3;
+      this.height = h3;
+    }
+  }
+}
+
+changeB(w1,h1,w2,h2,w3,h3,Player){
+
+  if(this.ch == 1) {
+    if(this.kind == "wea") {
+      this.width  = w1;
+      this.height = h1;
+    }
+    if(this.kind == "str") {
+      this.width  = w2;
+      this.height = h2; 
+    }
+    if(this.kind == "ult") {
+      this.width  = w3;
+      this.height = h3;
+    }
+  }
+}
+
+changeC(w1,h1,w2,h2,w3,h3,Player){
+
+    if(this.ch == 2) {
+    if(this.kind == "wea") {
+      this.width  = w1;
+      this.height = h1;
+    }
+    if(this.kind == "str") {
+      this.width  = w2;
+      this.height = h2; 
+    }
+    if(this.kind == "ult") {
+      this.width  = w3;
+      this.height = h3;
+    }
+  }
+}
+
+
+  update() {
+    if(this.p == player1) {
+    this.drawing(angle1, player1, moveUp1, moveDown1);
+    }
+
+    if(this.p == player2) {
+    this.drawing(angle2, player2, moveUp2, moveDown2);
+    }
+    this.changeA(50,100,50,50,player1.width + 40,player1.height + 80,this.p);
+    this.changeB(50,100,50,50,50,50,this.p);
+    this.changeC(50,100,50,50,50,50,this.p);
+  }  
+}
+
+let wea1 = new Skill( player1, chara1, "wea" );
+let wea2 = new Skill( player2, chara2, "wea" );
+ 
+let str1 = new Skill( player1, chara1, "str" );
+let str2 = new Skill( player2, chara2, "str" );
+ 
+let ult1 = new Skill( player1, chara1, "ult" );
+let ult2 = new Skill( player2, chara2, "ult" );
+
+function hitCheck( objA, objB ) {
+
+  if(objA.x < objB.x + objB.width &&
+     objA.x + objA.width > objB.x &&
+     objA.y < objB.y + objB.height &&
+     objA.y + objA.height > objB.y) {
+
+    return true; // 当たり判定が発生した場合
+  }
+    return false; // 当たり判定が発生しなかった場合
+  
+}
+
+function DrawSquer(ch) {
+
+  ctx.fillStyle = ch.color;
+  ctx.fillRect(ch.x, ch.y -50, ch.width, ch.height + 50);
+	 
+}
+
+function DrawPlayer(Angle,ch) {
+  if(Angle == 0) {
+    ctx.drawImage(ch.image, ch.x - (ch.width * 1.5 - ch.width) / 2, ch.y - (ch.height * 1.5 - ch.height-10), ch.width * 1.5, ch.height * 1.5);
+  } else {
+    ctx.save();  // 現在のコンテキストの状態を保存
+    ctx.scale(-1, 1);  // 水平方向に反転する
+    ctx.drawImage(ch.image, -ch.width - ch.x- (ch.width * 1.5 - ch.width) / 2, ch.y - (ch.height * 1.5 - ch.height -10), ch.width * 1.5, ch.height * 1.5);
+    ctx.restore(); 
+  }
+}
+
+function DrawSkill(){
+  ctx.fillStyle = "rgba(255,0,0,0.5)"
+  ctx.fillRect(wea1.x,wea1.y,wea1.width,wea1.height)
+  ctx.fillStyle = "rgba(0,255,0,0.5)"
+  ctx.fillRect(str1.x,str1.y,str1.width,str1.height)
+  ctx.fillStyle = "rgba(0,0,255,0.5)"
+  //ctx.fillRect(player1.x -20, player1.y -100, ult1.width + player1.width, ult1.height + player1.height + 40)
+  //ctx.fillRect(ult1.x,ult1.y,ult1.width,ult1.height)
+
+  //ctx.drawImage(effect,player2.x,player2.y,player2.width,player2.height)
+}
+
+function MoveProcess() {
+
+let moveX  = 0;
+let moveY  = 0;
+let moveX2 = 0;
+let moveY2 = 0;
+
+if(moveStop1 == false) {
+
+  if (moveRight1) {
+    moveX += player1.speed;
+  }
+
+  if (moveLeft1) {
+    moveX -= player1.speed;
+  }
+	 
+  //ジャンプ判定
+  if (moveJump1) {
+	
+    jumpOn1 == true;             //重力をなくす
+		
+    moveY -= upSpeed;            //プレイヤーをジャンプさせる
+		
+	 //一定の高さになったら重力を復活
+    if(player1.y < jumpHeight ){
+	   jumpOn1 = false;
+      moveJump1 = false;
+		touchGround1 = false;
+    }		
+  }
+}
+
+if(moveStop2 == false) {
+
+  if (moveRight2) {
+    moveX2 += player2.speed;
+  }
+
+  if (moveLeft2) {
+    moveX2 -= player2.speed;
+  }
+	
+  if (moveJump2) {
+    jumpOn2 == true;
+	 
+    moveY2 -= upSpeed; 
+		 
+	 if(player2.y < player2.height + jumpHeight){
+	   jumpOn2 = false;
+	   moveJump2 = false;
+		touchGround2 = false;
+	 }
+  }
+}
+
+//プレイヤーがプレイヤーの上に乗ったときの処理
+if (player1.y > player2.y - player2.height - 1 && player1.y < player2.y ) {
+  if (player1.x + player1.width > player2.x && player1.x < player2.x + player2.width) {
+    if (player1.x + player1.width / 2 < player2.x + player2.width / 2) {
+	 
+      let overlap = (player1.x + player1.width) - player2.x; 
+		
+      if( player1.x == 0 ) {
+		  player2.x += overlap
+		}else{
+		  player1.x -= overlap; 
+		}
+		
+    } else {
+	 
+      let overlap = player1.x - ( player2.x + player2.width );
+      
+		if( player1.x == 1180 ){
+		  player2.x +=overlap
+		}else{
+		  player1.x -= overlap;
+		}
+    }
+  }
+}
+
+if (player2.y > player1.y - player2.height - 1 && player2.y < player1.y ) {
+  if (player2.x + player2.width > player1.x && player2.x < player1.x + player1.width) {
+    if (player2.x + player2.width / 2 < player1.x + player1.width / 2) {
+	 
+      let overlap = (player2.x + player2.width) - player1.x; 
+	 
+      if(player2.x == 0){
+        player1.x += overlap
+	   }else{
+	  	  player2.x -= overlap; 
+	   }
+	 
+    } else {
+	 
+      let overlap = player2.x - (player1.x + player1.width);
+	 
+      if(player2.x == 0){
+	     player1.x += overlap
+	   }else{
+	     player2.x -= overlap; 
+	   }
+    }
+  }
+}
+
+let nextX = player1.x + moveX;
+let nextY = player1.y + moveY;
+
+nextX = Math.max(0, Math.min(nextX, can.width - player1.width));
+nextY = Math.max(0, Math.min(nextY, can.height - player1.height));
+
+let hit1 = hitCheck({ x: nextX, y: nextY, width: player1.width, height: player1.height }, player2);
+
+if ( hit1 ) {
+  let newNextX = nextX;
+  let newNextY = nextY;
+
+  if ( moveX > 0 ) {
+    while (hitCheck({ x: newNextX, y: player1.y, width: player1.width, height: player1.height }, player2)) {
+      newNextX--;
+    }
+  }else if ( moveX < 0 ) {
+    while (hitCheck({ x: newNextX, y: player1.y, width: player1.width, height: player1.height }, player2)) {
+      newNextX++;
+    }
+  }
+
+  if ( moveY > 0 ) {
+    while (hitCheck({ x: player1.x, y: newNextY, width: player1.width, height: player1.height }, player2)) {
+      newNextY--;
+    }
+  } else if ( moveY < 0 ) {
+    while (hitCheck({ x: player1.x, y: newNextY, width: player1.width, height: player1.height }, player2)) {
+      newNextY++;
+    }
+  }
+
+  player1.x = newNextX;
+  player1.y = newNextY;
+
+}else{
+  player1.x = nextX;
+  player1.y = nextY;
+}
+
+let nextX2 = player2.x + moveX2;
+let nextY2 = player2.y + moveY2;
+
+nextX2 = Math.max(0, Math.min(nextX2, can.width - player2.width));
+nextY2 = Math.max(0, Math.min(nextY2, can.height - player2.height));
+
+let hit2 = hitCheck({ x: nextX2, y: nextY2, width: player2.width, height: player2.height }, player1);
+
+if (hit2) {
+
+  let newNextX2 = nextX2;
+  let newNextY2 = nextY2;
+
+  if ( moveX2 > 0 ) {
+    while (hitCheck({ x: newNextX2, y: player2.y, width: player2.width, height: player2.height }, player1)) {
+      newNextX2--;
+    }
+  } else if (moveX2 < 0) {
+    while (hitCheck({ x: newNextX2, y: player2.y, width: player2.width, height: player2.height }, player1)) {
+      newNextX2++;
+     }
+  }
+
+  if (moveY2 > 0) {
+    while (hitCheck({ x: player2.x, y: newNextY2, width: player2.width, height: player2.height }, player1)) {
+      newNextY2--;
+    }
+  } else if (moveY2 < 0) {
+    while (hitCheck({ x: player2.x, y: newNextY2, width: player2.width, height: player2.height }, player1)) {
+      newNextY2++;
+    }
+  }
+
+  player2.x = newNextX2;
+  player2.y = newNextY2;
+  
+  } else {
+  player2.x = nextX2;
+  player2.y = nextY2;
+}
+
+    
+}
+
+
+function eyeAngle(){
+
+   if( player1.x > player2.x ){
+	   angle1 = 1;
+		angle2 = 0;
+	}
+	if( player1.x < player2.x ){
+	   angle1 = 0;
+		angle2 = 1;
+	}
+}
+
+let immutableWidth2 = player2.width
+let immutableHeight2 = player2.height
+let immutableWidth1 = player1.width
+let immutableHeight1 = player1.height
+
+let ultOnly1 = false
+function SkillProcess(){
+
+  if(weaKey1 && moveStop1 == false ){
+		 
+    ctx.fillStyle = wea1.color;
+    ctx.fillRect(wea1.x, wea1.y, wea1.width, wea1.height);
+		
+	  if(hitCheck(player2,wea1)){
+	     
+      if( angle1 == 0 ) {
+        player2.x += 130
+      }else{
+        player2.x -= 130
+      }
+
+      if(moveProtect2 == false){
+        moveStop2 = true;
+        player2.HP -= 5;
+	      player2.image = Wobble[chara2]
+        player2.width =  player2.height
+        player2.height =  immutableWidth2  
+      }else{
+        moveStop1 = true;
+        if( angle2 == 0 ) {
+          player1.x += 130
+        }else{
+          player1.x -= 130
+        }
+        setTimeout(function() {
+          moveStop1 = false;
+        }, counterSpeed1); 
+      }
+			
+	    setTimeout(function() {
+        moveStop2 = false;
+		    player2.image = Stand[chara2]
+		    player2.width =  immutableWidth2
+        player2.height =  immutableHeight2
+      }, actionSpeed2); 
+	  }
+	  weaKey1 = false;
+  }
+	  
+	 
+	 if(strKey1 && moveStop1 == false ){
+	  ctx.fillStyle = str1.color;
+    ctx.fillRect(str1.x, str1.y, str1.width, str1.height);
+
+    if(chara1 == 0 ){
+    
+      if(angle1 == 0){
+        player1.x += 300;
+      }else{
+        player1.x -= 300;
+      }
+
+      if(hitCheck(player1,player2)){
+       
+        player2.HP -= 50
+        player2.image = Lie[chara2]
+        moveStop2 = true
+
+        if(angle2 == 1){
+          player2.y -= 500
+          player2.x += 300
+        }else{
+          player2.y -= 500
+          player2.x -= 300
+        }
+
+        setTimeout(function() {
+          player2.image = Stand[chara2]
+          moveStop2 = false
+        }, 1000); 
+	  }
+	   
+	  
+	  strKey1 = false;
+	 }
+
+     if(chara1 == 1){
+
+     }
+  }
+	 
+	 if(ultKey1 && moveStop1 == false ){
+	  
+
+    if(chara1 == 0){
+      
+      if(ultOnly1 == false){
+        jumpOn1 = true;
+        player1.y -= 500;
+        setTimeout(function() {
+          player1.y += 300
+          player1.ultPoint += 1;
+          jumpOn1 = false
+        }, 2000); 
+      }
+      ultOnly1 = true;
+      ctx.fillStyle = ult1.color;
+      ctx.fillRect(ult1.x,ult1.y,ult1.width,ult1.height);
+
+      if(hitCheck(ult1,player2)){
+        if(angle2 == 1){
+        player2.y -= 300
+        player2.x += 300
+        }else{
+          player2.y -= 300
+          player2.x -= 300
+        }
+      }
+
+    }
+	  setTimeout(function() {
+	    ultKey1 = false;
+    }, 2200); 
+
+    if(chara1 == 1){
+    }
+
+
+
+
+	 }
+	 
+	 
+	 if(weaKey2  && moveStop2 == false ){
+
+	   ctx.fillStyle = wea2.color;
+     ctx.fillRect(wea2.x, wea2.y, wea2.width, wea2.height);
+		
+	   if(hitCheck(player1,wea2)){
+
+      if( angle2 == 0 ) {
+        player1.x += 130
+      }else{
+        player1.x -= 130
+      }
+			
+      if(moveProtect1 == false){
+        player1.HP -= 5;
+        player1.image = Wobble[chara1]
+      player1.width =  player1.height
+     player1.height =  immutableWidth1
+			
+			moveStop1 = true;
+        }else {
+          moveStop2 = true;
+          if( angle2 == 1 ) {
+            player2.x += 130
+          }else{
+            player2.x -= 130
+
+          }
+          setTimeout(function() {
+           moveStop2 = false;
+          }, counterSpeed2); 
+        }
+			
+			
+	   setTimeout(function() {
+         moveStop1 = false
+			player1.image = Stand[chara1]
+
+            player1.width =  immutableWidth1
+            player1.height =  immutableHeight1
+
+		
+
+      }, actionSpeed1); 
+		
+
+		
+		
+		
+	   }
+		
+		
+	  
+	   weaKey2 = false;
+	  
+	  }
+}
+
+function HPbar(){
+
+//HPバーの長さ
+let barWidth1 = can.width / 3
+let barWidth2 = can.width / 3
+
+let barHeight1 = can.height / 12
+let barHeight2 = can.height / 12
+
+//プレイヤーのHPを１００分割してＨＰバーの長さも同じだけ消す
+const HPpercent1 = (player1.maxHP - player1.HP) / player1.maxHP;
+barWidth1 = barWidth1 - (barWidth1 * HPpercent1);
+
+const HPpercent2 = (player2.maxHP - player2.HP) / player2.maxHP;
+barWidth2 = barWidth2 - (barWidth2 * HPpercent2);
+
+ctx.fillStyle = "black"
+ctx.fillRect(125,can.height / 13,can.width / 2.9,60)
+ctx.fillRect(can.width -125 ,can.height / 13,-can.width / 2.9,60)
+
+
+ctx.fillStyle = "lightgreen"
+ctx.fillRect(130,barHeight1,barWidth1,50)
+ctx.fillRect(can.width -130 ,barHeight2,-barWidth2,50)
+
+}
+ 
+
+function ultBar(){
+let ultbarWidth1 = can.width / 3.6
+let ultbarWidth2 = can.width / 3.6
+
+let ultbarHeight1 = can.height / 6.3
+let ultbarHeight2 = can.height / 6.3
+
+const ultpercent1 = (player1.ultMaxP - player1.ultP) / player1.ultMaxP;
+ultbarWidth1 = ultbarWidth1 - (ultbarWidth1 * ultpercent1);
+
+const ultpercent2 = (player2.ultMaxP - player2.ultP) / player2.ultMaxP;
+ultbarWidth2 = ultbarWidth2 - (ultbarWidth2 * ultpercent2);
+
+ctx.fillStyle = "black"
+ctx.fillRect(125,can.height / 6.5,can.width / 3.5,30)
+ctx.fillRect(can.width -125 ,can.height / 6.5,-can.width / 3.5,30)
+
+ctx.fillStyle = "red"
+
+ctx.fillRect(130,ultbarHeight1,ultbarWidth1,20)
+ctx.fillRect(can.width -130 ,ultbarHeight2,-ultbarWidth2,20)
+  
+
+}
+
+function gravity(){
+   if(player1.y > ground - player1.height ){
+	  if( touchGround1 == false){
+	    player1.image = Stand[chara1] //プレイヤー画像を
+	    touchGround1 = true;
+	  }
+	}else{
+	if( jumpOn1 == false){
+     player1.y += downSpeed;
+   }
+	}
+	 
+   if(player2.y > ground - player2.height ){
+     if( touchGround2 == false){
+	    player2.image = Stand[chara2] //プレイヤー画像を
+	    touchGround2 = true;
+	  }
+	}else{
+	   if(jumpOn2 == false){
+         player2.y += downSpeed;
+		}
+   }
+}
+
+//長押しできないようにする
+let weakNoRepeat1 = false
+let weakNoRepeat2 = false
+let strNoRepeat1 = false
+let strNoRepeat2 = false
+
+//連続で攻撃を出させない
+let wealock = false
+let wealock2 = false
+let strlock = false
+let strlock2 = false
+let ultlock1 = false
+let ultlock2 = false
+
+const ultArray1 =[]
+
+
+
+document.addEventListener('keydown', (event) => {
+  
+  let c = event.keyCode;
+
+    //右
+    if (c === 68) {
+      moveRight1 = true;
+      ultArray1.push("右");
+      setTimeout(function() {
+      ultArray1.splice("右", 1);
+      }, 500);
+    }
+  
+    //左
+    if (c === 65) {
+      moveLeft1 = true;
+      ultArray1.push("左");
+      setTimeout(function() {
+      ultArray1.splice("左", 1);
+      }, 500);
+    }
+
+    //上
+    if (c === 87) {
+      moveUp1 = true;
+      ultArray1.push("上");
+      setTimeout(function() {
+      ultArray1.splice("上", 1);
+      }, 500);
+    }
+
+    //下
+    if (c === 83) {
+      moveDown1 = true;
+      ultArray1.push("下");
+      setTimeout(function() {
+      ultArray1.splice("下", 1);
+      }, 500);
+    }
+  
+    //ジャンプ 
+    if (c === 67 && moveStop1 == false) {
+      if( player1.y == ground - player1.height + 1 ){
+	      player1.image = Jump[ chara1 ]
+        moveJump1 = true;
+      }	 
+    }
+ 
+    //弱攻撃
+    if( c === 69 && wealock == false && weakNoRepeat1 == false ){
+      weaKey1 = true;             //弱攻撃開始
+      wealock = true;             //行って時間打てないようにする
+
+      setTimeout(function() {
+        wealock = false;
+      }, weakAttackSpeed1);
+ 
+      weakNoRepeat1 = true            //長押しで反応しないようにする
+    }
+  
+    //強攻撃
+    if( c === 82 && strlock == false && strNoRepeat1 == false){
+
+      strKey1 = true;
+      strlock = true;
+
+      setTimeout(function() {
+      strlock = false;
+    }, 100);
+      strNoRepeat1 = true
+    }
+
+    console.log(ultArray1)
+    if(ultArray1[0] == "右" && ultArray1[1] == "左" && ultArray1[2] == "右"  && ultArray1[3] == "左"){
+      if(ultlock1 == false){
+        ultKey1 = true;
+        ultlock1 = true;
+      }
+  }
+  
+
+    
+    //ガード
+    if( c === 70 ){
+      moveProtect1 = true
+      player1.image = Guard[chara1]
+    }
+
+
+
+  //右
+  if (c === 220) {
+    moveRight2 = true;
+  }
+
+  //左
+  if (c === 186) {
+    moveLeft2 = true;
+  }
+
+  //上
+  if (c === 219) {
+    moveUp2 = true;
+  }
+
+  //下
+  if (c === 222) {
+    moveDown2 = true;
+  }
+
+
+  //ジャンプ
+	if (c === 190 && moveStop2 == false) {
+    if( player2.y == ground - player2.height + 1){
+		  player2.image = Jump[chara2]
+      moveJump2 = true;
+		}
+  }
+	 
+	
+  if( c === 80 && wealock2 == false && weakNoRepeat2 == false ){
+
+weaKey2 = true;
+wealock2 = true;
+
+setTimeout(function() {
+  wealock2 = false;
+}, weakAttackSpeed2);
+
+weakNoRepeat2 = true
+}
+
+//強攻撃
+if( c === 79 && strlock2 == false){
+
+  strKey2 = true;
+  strlock2 = true;
+}
+
+	
+if(c===76) {
+    moveProtect2 = true;
+    player2.image = Guard[chara2]
+}
+	 
+  });
+  
+document.addEventListener('keyup', (event) => {
+  let c = event.keyCode;
+
+  //右
+  if (c === 68) {
+    moveRight1 = false;
+  }
+
+  //左
+  if (c === 65) {
+    moveLeft1 = false;
+  }
+  
+  //上
+  if (c === 87) {
+    moveUp1 = false
+  }
+  
+  //下
+  if (c === 83) {
+    moveDown1 = false;
+  }
+
+  //弱攻撃
+	if( c === 69){
+	 weakNoRepeat1 = false
+	}
+	 
+  //強攻撃
+	if( c === 82){
+    strNoRepeat1 = false
+	}
+
+  //ガード
+  if( c === 70 ){
+    moveProtect1 = false;
+    player1.image = Stand[chara1];
+  }
+
+	 
+	if (c === 220) {
+    moveRight2 = false;
+  }
+
+  if (c === 186) {
+      moveLeft2 = false;
+  }
+
+  if (c === 219) {
+    moveUp2 = false;
+  }
+
+  if (c === 222) {
+    moveDown2 = false;
+  }
+	 
+	if( c === 80){
+	  weakNoRepeat2 = false
+	}
+
+  if(c===76) {
+    moveProtect2 = false;
+    player2.image = Stand[chara2];
+  }
+	
+	 
+  });
+
+  function Timer() {
+
+  
+  ctx.imageSmoothingEnabled = false;
+  
+
+  if(phase == 4) {
+    
+    
+    can.height = window.innerHeight;
+    ground = can.height - 1;
+    
+  
+  ctx.drawImage(back,0,0,back.width,back.height,0,0,can.width,can.height)
+
+  
+	 
+  
+  DrawPlayer(angle1,player1);
+  DrawPlayer(angle2,player2);
+  //DrawSquer(player1);
+  //DrawSquer(player2);
+  DrawSkill()
+  MoveProcess();
+  SkillProcess();
+  eyeAngle();
+  gravity();
+  HPbar();
+  ultBar()
+
+ 
+  wea1.update();
+  wea2.update();
+	
+  str1.update();
+  str2.update();
+	
+  ult1.update();
+  ult2.update();
+
+  
+
+
+  
+  }
+
+  
+
+}
+
+player1.update();
+player2.update();
+	 
+setInterval(Timer, 33);
+
+
+
+let buttonPressed = []; // ボタンが押されたかのフラグ (可変長のボタンに対応)
+let stickMoved = []; // スティックが倒されたかのフラグ
+
+window.addEventListener("gamepadconnected", function (e) {
+  console.log("Gamepad connected");
+  gameLoop();
+});
+
+function gameLoop() {
+  const gamepads = navigator.getGamepads();
+
+  // 各ゲームパッドごとに処理を行う
+  for (let i = 0; i < gamepads.length; i++) {
+    const gamepad = gamepads[i];
+
+    // ゲームパッドが接続されているか確認
+    if (gamepad) {
+      // ボタンのイベントを検知
+      for (let j = 0; j < gamepad.buttons.length; j++) {
+        const button = gamepad.buttons[j];
+
+        if (button.pressed && !buttonPressed[i]?.[j]) {
+          buttonPressed[i] = buttonPressed[i] || [];
+          buttonPressed[i][j] = true;
+          handleButtonPress(i, j);
+        } else if (!button.pressed && buttonPressed[i]?.[j]) {
+          buttonPressed[i][j] = false;
+          handleButtonRelease(i, j);
+        }
+      }
+
+      // スティックのイベントを検知
+      for (let j = 0; j < gamepad.axes.length; j += 2) {
+        const axisX = gamepad.axes[0];
+        const axisY = gamepad.axes[1];
+
+        // スティックを倒した方向を判定
+        if (axisX > 0.5) {
+          if (axisY > 0.5) {
+            handleStickMove(i, "right-down");
+            stickMoved[i] = true;
+          } else if (axisY < -0.5) {
+            handleStickMove(i, "right-up");
+            stickMoved[i] = true;
+          } else {
+            handleStickMove(i, "right");
+            stickMoved[i] = true;
+          }
+        } else if (axisX < -0.5) {
+          if (axisY > 0.5) {
+            handleStickMove(i, "left-down");
+            stickMoved[i] = true;
+          } else if (axisY < -0.5) {
+            handleStickMove(i, "left-up");
+            stickMoved[i] = true;
+          } else {
+            handleStickMove(i, "left");
+            stickMoved[i] = true;
+          }
+        } else {
+          if (axisY > 0.5) {
+            handleStickMove(i, "down");
+            stickMoved[i] = true;
+          } else if (axisY < -0.5) {
+            handleStickMove(i, "up");
+            stickMoved[i] = true;
+          } else {
+            handleStickMove(i, "neutral");
+            stickMoved[i] = false;
+          }
+        }
+      }
+    }
+  }
+
+  requestAnimationFrame(gameLoop);
+}
+
+function handleButtonPress(gamepadIndex, buttonIndex) {
+  if (gamepadIndex === 0) {
+  console.log( buttonIndex)
+    if (buttonIndex === 0) {
+      // console.log("ゲームパッド1のボタンBを押した");
+      moveProtect1 = true
+      player1.image = Guard[chara1]
+    } else if (buttonIndex === 1 && moveStop1 == false) {
+      // console.log("ゲームパッド1のボタンAを押した");
+      if( player1.y == ground - player1.height + 1 ){
+	      player1.image = Jump[ chara1 ]
+        moveJump1 = true;
+      }	 
+    } else if (buttonIndex === 2) {
+      // console.log("ゲームパッド1のボタンYを押した");
+    } else if (buttonIndex === 3) {
+      // console.log("ゲームパッド1のボタンXを押した");
+    }else if (buttonIndex === 4) {
+
+    }else if (buttonIndex === 5  && lock == false && weakNoRepeat1 == false) {
+      ultTwoKey.push("A")
+    weaKey1 = true;
+    lock = true;
+
+    setTimeout(function() {
+      lock = false;
+    }, 10);
+ 
+    noRepeat1 = true
+
+}
+
+
+  } else if (gamepadIndex === 1) {
+    if (buttonIndex === 0) {
+      // console.log("ゲームパッド2のボタンBを押した");
+      moveProtect2 = true;
+    player2.image = Guard[chara2]
+    } else if (buttonIndex === 1&& moveStop2 == false) {
+      // console.log("ゲームパッド2のボタンAを押した");
+      if( player2.y == ground - player2.height + 1){
+		  player2.image = Jump[chara2]
+      moveJump2 = true;
+		}
+    } else if (buttonIndex === 2) {
+      // console.log("ゲームパッド2のボタンYを押した");
+    } else if (buttonIndex === 3) {
+      // console.log("ゲームパッド2のボタンXを押した");
+    }else if (buttonIndex === 4) {
+
+}else if (buttonIndex === 5  && lock2 == false && noRepeat2 == false) {
+  ultTwoKey2.push("A")
+weaKey2 = true;
+lock2 = true;
+
+setTimeout(function() {
+  lock2 = false;
+}, 10);
+
+noRepeat2 = true
+
+}
+  }
+}
+
+function handleButtonRelease(gamepadIndex, buttonIndex) {
+  if (gamepadIndex === 0) {
+    if (buttonIndex === 0) {
+      // console.log("ゲームパッド1のボタンBを離した");
+      moveProtect1 = false;
+      player1.image = Stand[chara1];
+    } else if (buttonIndex === 1) {
+      // console.log("ゲームパッド1のボタンAを離した");
+    } else if (buttonIndex === 2) {
+      // console.log("ゲームパッド1のボタンYを離した");
+    } else if (buttonIndex === 3) {
+      // console.log("ゲームパッド1のボタンXを離した");
+    }else if (buttonIndex === 4) {
+    }else if (buttonIndex === 5) {
+      ultTwoKey.splice("A",1);
+	    noRepeat1 = false
+    }
+  } else if (gamepadIndex === 1) {
+    if (buttonIndex === 0) {
+      // console.log("ゲームパッド2のボタンBを離した");
+      moveProtect2 = false;
+    player2.image = Stand[chara2];
+    } else if (buttonIndex === 1) {
+      // console.log("ゲームパッド2のボタンAを離した");
+    } else if (buttonIndex === 2) {
+      // console.log("ゲームパッド2のボタンYを離した");
+    } else if (buttonIndex === 3) {
+      // console.log("ゲームパッド2のボタンXを離した");
+    }else if (buttonIndex === 4) {
+    }else if (buttonIndex === 5) {
+      ultTwoKey2.splice("A",1);
+	    noRepeat2 = false
+    }
+  }
+}
+
+function handleStickMove(gamepadIndex, direction) {
+  if (gamepadIndex === 0) {
+    if (direction === "up") {
+      // console.log("ゲームパッド1が上にスティックを倒した");
+      moveUp1 = true;
+    } else if (direction === "down") {
+      // console.log("ゲームパッド1が下にスティックを倒した");
+      moveDown1 = true;
+    } else if (direction === "right") {
+      // console.log("ゲームパッド1が右にスティックを倒した");
+      moveRight1 = true;
+    } else if (direction === "left") {
+      // console.log("ゲームパッド1が左にスティックを倒した");
+      moveLeft1 = true;
+    } else if (direction === "right-up") {
+      // console.log("ゲームパッド1が右上にスティックを倒した");
+    } else if (direction === "right-down") {
+      // console.log("ゲームパッド1が右下にスティックを倒した");
+    } else if (direction === "left-up") {
+      // console.log("ゲームパッド1が左上にスティックを倒した");
+    } else if (direction === "left-down") {
+      // console.log("ゲームパッド1が左下にスティックを倒した");
+    } else if (direction === "neutral") {
+      // console.log("ゲームパッド1のスティックが中立位置に戻った");
+      moveRight1 = false;
+      moveLeft1 = false;
+      moveUp1 = false;
+      moveDown1 = false;
+    }
+  } else if (gamepadIndex === 1) {
+    if (direction === "up") {
+      // console.log("ゲームパッド2が上にスティックを倒した");
+      moveUp2 = true;
+    } else if (direction === "down") {
+      // console.log("ゲームパッド2が下にスティックを倒した");
+      moveDown2 = true;
+    } else if (direction === "right") {
+      // console.log("ゲームパッド2が右にスティックを倒した");
+      moveRight2 = true;
+    } else if (direction === "left") {
+      // console.log("ゲームパッド2が左にスティックを倒した");
+      moveLeft2 = true;
+    } else if (direction === "right-up") {
+      // console.log("ゲームパッド2が右上にスティックを倒した");
+    } else if (direction === "right-down") {
+      // console.log("ゲームパッド2が右下にスティックを倒した");
+    } else if (direction === "left-up") {
+      // console.log("ゲームパッド2が左上にスティックを倒した");
+    } else if (direction === "left-down") {
+      // console.log("ゲームパッド2が左下にスティックを倒した");
+    } else if (direction === "neutral") {
+      // console.log("ゲームパッド2のスティックが中立位置に戻った")
+      moveRight2 = false;
+      moveLeft2 = false;
+      moveUp2 = false;
+      moveDown2 = false;;
+    }
+  }
+}
+
+gameLoop();
+
+
+
+
+</script>
