@@ -23,9 +23,9 @@ let btnImg  = new Image(); btnImg.src  = "ボタン.png"
 
 //let effect = new Image(); effect.src = "あたりエフェクト.jpeg"
 
-let standA  = new Image(); standA.src  = "立ちA.png";
-let standB  = new Image(); standB.src  = "立ちB.png";
-let standC  = new Image(); standC.src  = "立ちC.png";
+let standA  = new Image(); standA.src  = "立ちパンダ.png";
+let standB  = new Image(); standB.src  = "立ちうさぎ.png";
+let standC  = new Image(); standC.src  = "立ち恐竜.png";
 
 let jumpA   = new Image(); jumpA.src   = "ジャンプA.png";
 let jumpB   = new Image(); jumpB.src   = "ジャンプB.png";
@@ -173,8 +173,8 @@ let chC2 = new ChC();
 const ch1 = [chA1, chB1, chC1];
 const ch2 = [chA2, chB2, chC2];
  
-let chara1 = 1;
-let chara2 = 0;
+let chara1 = 0;
+let chara2 = 2;
   
 let player1 = ch1[chara1];
 let player2 = ch2[chara2];
@@ -919,28 +919,28 @@ document.addEventListener('keydown', (event) => {
 
 
   //右
-  if (c === 220) {
+  if (c === 74) {
     moveRight2 = true;
   }
 
   //左
-  if (c === 186) {
+  if (c === 76) {
     moveLeft2 = true;
   }
 
   //上
-  if (c === 219) {
+  if (c === 73) {
     moveUp2 = true;
   }
 
   //下
-  if (c === 222) {
+  if (c === 75) {
     moveDown2 = true;
   }
 
 
   //ジャンプ
-	if (c === 190 && moveStop2 == false) {
+	if (c === 78 && moveStop2 == false) {
     if( player2.y == ground - player2.height + 1){
 		  player2.image = Jump[chara2]
       moveJump2 = true;
@@ -948,7 +948,7 @@ document.addEventListener('keydown', (event) => {
   }
 	 
 	
-  if( c === 80 && wealock2 == false && weakNoRepeat2 == false ){
+  if( c === 85 && wealock2 == false && weakNoRepeat2 == false ){
 
 weaKey2 = true;
 wealock2 = true;
@@ -961,14 +961,14 @@ weakNoRepeat2 = true
 }
 
 //強攻撃
-if( c === 79 && strlock2 == false){
+if( c === 89 && strlock2 == false){
 
   strKey2 = true;
   strlock2 = true;
 }
 
 	
-if(c===76) {
+if(c===72) {
     moveProtect2 = true;
     player2.image = Guard[chara2]
 }
@@ -1015,27 +1015,27 @@ document.addEventListener('keyup', (event) => {
   }
 
 	 
-	if (c === 220) {
+	if (c === 74) {
     moveRight2 = false;
   }
 
-  if (c === 186) {
+  if (c === 76) {
       moveLeft2 = false;
   }
 
-  if (c === 219) {
+  if (c === 73) {
     moveUp2 = false;
   }
 
-  if (c === 222) {
+  if (c === 75) {
     moveDown2 = false;
   }
 	 
-	if( c === 80){
+	if( c === 85){
 	  weakNoRepeat2 = false
 	}
 
-  if(c===76) {
+  if(c===72) {
     moveProtect2 = false;
     player2.image = Stand[chara2];
   }
@@ -1058,7 +1058,7 @@ document.addEventListener('keyup', (event) => {
   
   ctx.drawImage(back,0,0,back.width,back.height,0,0,can.width,can.height)
 
-  
+  //W=1920 H=1080
 	 
   
   DrawPlayer(angle1,player1);
@@ -1088,6 +1088,8 @@ document.addEventListener('keyup', (event) => {
 
   
   }
+
+  
 
 }
 
