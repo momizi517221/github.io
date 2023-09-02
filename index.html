@@ -14,8 +14,6 @@ body {
 
 const can = document.getElementById('myCanvas');
 const ctx = can.getContext('2d');
-
-alert(can.width,can.height)
   
 let ts = 32;
 let phase = 4
@@ -1060,6 +1058,8 @@ document.addEventListener('keyup', (event) => {
   
   ctx.drawImage(back,0,0,back.width,back.height,0,0,can.width,can.height)
 
+	  alert(can.width,can.height)
+
   
 	 
   
@@ -1090,8 +1090,6 @@ document.addEventListener('keyup', (event) => {
 
   
   }
-
-  
 
 }
 
